@@ -20,11 +20,12 @@ export default defineConfig({
   root: '.',
   publicDir: 'public',
   server: {
-    port: 3000,
+    port: 5173,
     host: true,
     hmr: {
       overlay: true
-    }
+    },
+    strictPort: false
   },
   esbuild: {
     charset: 'utf8'
