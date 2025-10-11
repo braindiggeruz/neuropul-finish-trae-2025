@@ -21,7 +21,13 @@ export default defineConfig({
   publicDir: 'public',
   server: {
     port: 3000,
-    host: true
+    host: true,
+    hmr: {
+      overlay: true
+    }
+  },
+  esbuild: {
+    charset: 'utf8'
   },
   build: {
     target: 'es2020',
