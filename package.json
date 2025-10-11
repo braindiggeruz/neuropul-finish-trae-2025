@@ -19,6 +19,8 @@
     "test:a11y": "playwright test tests/a11y/",
     "test:accessibility": "pa11y-ci --sitemap http://localhost:5173/sitemap.xml --threshold 10",
     "test:lighthouse": "lhci autorun || true",
+    "test:lighthouse:median": "node scripts/lighthouse-median.mjs",
+    "test:contract": "tsx tests/contract/validate.ts",
     "test:size-limit": "size-limit",
     "test:all": "npm run test && npm run test:e2e && npm run test:a11y && npm run test:lighthouse && npm run test:size-limit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -74,12 +76,14 @@
     "rollup-plugin-visualizer": "^6.0.4",
     "size-limit": "^11.0.1",
     "tailwindcss": "^3.3.5",
+    "tsx": "^4.19.0",
     "typescript": "^5.2.2",
     "vite": "^4.5.0",
     "vite-plugin-pwa": "^0.16.4",
     "vitest": "^0.34.6",
     "web-vitals": "^3.5.0",
-    "workbox-build": "^7.0.0"
+    "workbox-build": "^7.0.0",
+    "zod": "^3.23.8"
   },
   "engines": {
     "node": ">=18.0.0",

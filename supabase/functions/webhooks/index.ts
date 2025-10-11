@@ -31,11 +31,73 @@ async function handleStripeWebhook(req: Request): Promise<Response> {
     }
 
     const payload = await req.json();
+    const evt = payload;
+
+    // Extract payment data from Stripe event
+    const obj = evt.data?.object || {};
+    const provider_tx_id = obj.id || evt.id;
+    const amount_minor = obj.amount_received ?? obj.amount ?? 0;
+    const currency = (obj.currency || "usd").toUpperCase();
+    const status = obj.status === "succeeded" ? "succeeded" : "pending";
+    const trace_id = crypto.randomUUID();
+
+    // Get Supabase credentials
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || Deno.env.get("VITE_SUPABASE_URL");
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!SUPABASE_URL || !SERVICE_KEY) {
+      throw new Error("Missing Supabase credentials");
+    }
+
+    // Insert payment into database using REST API
+    const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/paywall.payments_log`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SERVICE_KEY}`,
+        "apikey": SERVICE_KEY,
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify({
+        provider: "stripe",
+        provider_tx_id,
+        user_id: obj.metadata?.user_id || null,
+        amount_minor,
+        currency,
+        status,
+        trace_id,
+        metadata: evt
+      })
+    });
+
+    // Handle insert result
+    if (!insertRes.ok) {
+      const errorText = await insertRes.text();
+      console.error("DB insert failed:", insertRes.status, errorText);
+
+      // Don't fail webhook if duplicate (409 Conflict = idempotency key collision)
+      if (insertRes.status === 409) {
+        return jsonResponse({
+          ok: true,
+          provider: "stripe",
+          event_type: evt.type,
+          duplicate: true,
+          received_at: new Date().toISOString(),
+        });
+      }
+
+      throw new Error(`DB insert failed: ${errorText}`);
+    }
+
+    const inserted = await insertRes.json();
+    const payment_id = inserted[0]?.id;
 
     return jsonResponse({
       ok: true,
       provider: "stripe",
-      event_type: payload.type,
+      payment_id,
+      trace_id,
+      event_type: evt.type,
       received_at: new Date().toISOString(),
     });
   } catch (error) {
