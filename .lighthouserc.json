@@ -1,0 +1,25 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "dist",
+      "numberOfRuns": 3
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:performance": ["error", {"minScore": 0.90}],
+        "categories:accessibility": ["warn", {"minScore": 0.95}],
+        "categories:best-practices": ["warn", {"minScore": 0.90}],
+        "categories:seo": ["warn", {"minScore": 0.90}],
+        "metrics/largest-contentful-paint": ["error", {"maxNumericValue": 2000}],
+        "metrics/cumulative-layout-shift": ["error", {"maxNumericValue": 0.08}],
+        "metrics/interaction-to-next-paint": ["error", {"maxNumericValue": 160}],
+        "metrics/total-blocking-time": ["warn", {"maxNumericValue": 300}],
+        "metrics/first-contentful-paint": ["warn", {"maxNumericValue": 1500}]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
