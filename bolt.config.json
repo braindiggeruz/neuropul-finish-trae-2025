@@ -1,0 +1,6 @@
+{
+  "template": "bolt-vite-react-ts",
+  "entry": "src/main.tsx",
+  "framework": "vite",
+  "language": "typescript"
+}
